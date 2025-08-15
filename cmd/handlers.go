@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/joho/godotenv"
 )
 
 type ClipboardRequest struct {
@@ -84,9 +87,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	var savedPassword string
+	fmt.Println(req)
 
-	err := DB.QueryRow(context.Background(), "SELECT password FROM users WHERE email = $1", req.Email).Scan(&savedPassword)
+	var savedPassword string
+	var user_name string
+
+	err := DB.QueryRow(context.Background(), "SELECT password,user_name FROM users WHERE email = $1", req.Email).Scan(&savedPassword, &user_name)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "User not found"})
@@ -102,6 +108,31 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Logged in successfuly"})
+	token, err := createToken(user_name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	}
 
+	c.JSON(http.StatusOK, gin.H{"message": "Logged in successfuly", "token": token})
+
+}
+
+func createToken(user_name string) (string, error) {
+
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+
+	var secretKey = []byte(os.Getenv("SECRETKEY"))
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_name": user_name,
+	})
+
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }

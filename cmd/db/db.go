@@ -13,6 +13,7 @@ var DB *pgxpool.Pool
 
 func DBstart() {
 	cfg := LoadDBConfig()
+	log.Println("Connecting with:", cfg.connString())
 
 	poolConfig, err := pgxpool.ParseConfig(cfg.connString())
 	if err != nil {

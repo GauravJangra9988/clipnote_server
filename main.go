@@ -1,23 +1,42 @@
 package main
 
 import (
-	"clipnote/server/cmd"
+	"clipnote/server/cmd/auth"
+	"clipnote/server/cmd/db"
+	handle "clipnote/server/cmd/handler.go"
+	"time"
+
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8081"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
+		ExposeHeaders:    []string{"Content-Length", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
-	cmd.DBstart()
+	db.DBstart()
 
-	r.POST("/register", cmd.Register)
-	r.POST("/login", cmd.Login)
-	r.POST("/save", cmd.Save)
+	r.POST("/register", handle.Register)
+	r.POST("/login", handle.Login)
+
+	protected := r.Group("/")
+	protected.Use(auth.AuthenticateUser())
+	protected.POST("/save", handle.Save)
+	protected.GET("/clips", handle.GetAllClips)
+	protected.DELETE("/delete", handle.DeleteClip)
+	protected.POST("/logout", handle.Logout)
 
 	go func() {
 		if err := r.Run(":8080"); err != nil {
@@ -29,6 +48,6 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	cmd.DB.Close()
+	db.DB.Close()
 
 }

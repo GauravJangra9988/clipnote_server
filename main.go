@@ -38,8 +38,12 @@ func main() {
 	protected.DELETE("/delete", handle.DeleteClip)
 	protected.POST("/logout", handle.Logout)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	go func() {
-		if err := r.Run(":8080"); err != nil {
+		if err := r.Run(":" + port); err != nil {
 			log.Fatalf("Server error: %v", err)
 		}
 	}()

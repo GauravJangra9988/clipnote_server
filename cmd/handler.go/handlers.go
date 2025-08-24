@@ -35,6 +35,10 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+func Test(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "server running"})
+}
+
 func Register(c *gin.Context) {
 	var req RegisterRequest
 

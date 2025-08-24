@@ -28,6 +28,7 @@ func main() {
 
 	db.DBstart()
 
+	r.GET("/", handle.Test)
 	r.POST("/register", handle.Register)
 	r.POST("/login", handle.Login)
 

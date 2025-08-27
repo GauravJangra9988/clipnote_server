@@ -18,7 +18,11 @@ import (
 func main() {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8081", "http://localhost:8081", "http://localhost:8080,https://clipnote-frontend.vercel.app/"},
+		AllowOrigins: []string{
+			"http://localhost:8080",
+			"http://localhost:8081",
+			"https://clipnote-frontend.vercel.app",
+		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
 		ExposeHeaders:    []string{"Content-Length", "Authorization"},
@@ -43,11 +47,9 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	go func() {
-		if err := r.Run(":" + port); err != nil {
-			log.Fatalf("Server error: %v", err)
-		}
-	}()
+	if err := r.RunTLS(":8080", "server.crt", "server.key"); err != nil {
+		log.Fatalf("Server error: %v", err)
+	}
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

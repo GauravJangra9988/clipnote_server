@@ -106,3 +106,7 @@ jobs:
         run: |
           docker compose -f docker-compose.yml down
           docker compose -f docker-compose.yml up -d
+
+      - name: Clean up Docker to free space
+        run: |
+          docker system prune -a --volumes -f || true

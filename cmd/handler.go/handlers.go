@@ -95,7 +95,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 	}
 
-	c.SetCookie("token", token, 3600, "/", "", false, false)
+	c.SetCookie("token", token, 3600, "/", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged in successfuly", "token": token})
 
 }
@@ -193,4 +193,5 @@ func Logout(c *gin.Context) {
 	c.SetCookie("token", "", -1, "/", "localhost", false, false)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged Out successfuly"})
 }
+
 

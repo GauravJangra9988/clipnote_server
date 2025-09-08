@@ -47,7 +47,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	if err := r.RunTLS(":8080", "server.crt", "server.key"); err != nil {
+	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
 
@@ -58,3 +58,4 @@ func main() {
 	db.DB.Close()
 
 }
+

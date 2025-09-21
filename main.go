@@ -6,7 +6,6 @@ import (
 	handle "clipnote/server/cmd/handler.go"
 	"time"
 
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -47,9 +46,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	if err := r.RunTLS(":8080", "server.crt", "server.key"); err != nil {
-		log.Fatalf("Server error: %v", err)
-	}
+	r.Run(port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

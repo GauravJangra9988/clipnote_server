@@ -46,7 +46,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	r.Run(port)
+	r.Run(":"+port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

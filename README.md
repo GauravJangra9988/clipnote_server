@@ -1,1 +1,1 @@
-Server for ClipNote
+ClipNote Server in Go

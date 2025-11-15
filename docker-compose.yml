@@ -1,8 +1,6 @@
-version: "3.9"
-
 services:
   app:
-    image: gauravjangra9988/clipnote_server:latest
+    build: .
     container_name: clipnote_app
     ports:
       - "8080:8080"
@@ -17,10 +15,11 @@ services:
     container_name: clipnote_db
     restart: always
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=clipnote_user
+      - POSTGRES_PASSWORD=clipnote_pass
+      - POSTGRES_DB=clipnote_db
     ports:
       - "5432:5432"
     volumes:
       - /var/lib/clipnote/postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql

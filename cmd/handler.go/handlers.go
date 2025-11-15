@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/jackc/pgx/v5"
 )
 
@@ -25,7 +24,7 @@ type JSONformatClipboardData struct {
 }
 
 type RegisterRequest struct {
-	User_name string `json:"user_name"`
+	UserName string `json:"user_name"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 }
@@ -48,11 +47,11 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	User_name := req.User_name
+	UserName := req.UserName
 	Email := req.Email
 	Password := req.Password
 
-	_, err := db.DB.Exec(context.Background(), "INSERT INTO users (user_name,email,password) VALUES ($1,$2,$3)", User_name, Email, Password)
+	_, err := db.DB.Exec(context.Background(), "INSERT INTO users (user_name,email,password) VALUES ($1,$2,$3)", UserName, Email, Password)
 	if err != nil {
 		log.Printf("Error inserting user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -72,9 +71,9 @@ func Login(c *gin.Context) {
 	fmt.Println(req)
 
 	var savedPassword string
-	var user_name string
+	var userName string
 
-	err := db.DB.QueryRow(context.Background(), "SELECT password,user_name FROM users WHERE email = $1", req.Email).Scan(&savedPassword, &user_name)
+	err := db.DB.QueryRow(context.Background(), "SELECT password,user_name FROM users WHERE email = $1", req.Email).Scan(&savedPassword, &userName)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "User not found"})
@@ -90,7 +89,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := token.CreateToken(user_name)
+	token, err := token.CreateToken(userName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 	}
@@ -112,9 +111,9 @@ func Save(c *gin.Context) {
 	}
 
 	llmOutputData := ProcessWithLLM(req.Data)
-	cleanllmData := CleanLLMOutput(llmOutputData)
+	// cleanllmData := CleanLLMOutput(llmOutputData)
 
-	JSONformatedData, err := ParseLLMoutput(cleanllmData)
+	JSONformatedData, err := ParseLLMoutput(llmOutputData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse LLM output"})
 		return

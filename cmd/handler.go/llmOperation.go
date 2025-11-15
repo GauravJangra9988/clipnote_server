@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"regexp"
-	"strings"
+
 
 	"google.golang.org/genai"
 )
@@ -26,20 +25,20 @@ func ProcessWithLLM(clipboardData string) string {
   "text": "The same text minimally formatted: remove extra spaces, unnecessary characters, trim leading/trailing spaces",
   "tag": "A single label describing the type of text, e.g., code, SQL query, plain text, credentials, notes, log, configuration, command, etc. Choose the most appropriate label."
 }
-⚠ Important:
-- Do NOT include markdown formatting, code fences, or any extra text.  
-- Output must be plain JSON only so it can be parsed programmatically.
-Do not include anything other than the JSON object. Format it exactly like JSON so it can be parsed programmatically.
-
 Here is the text to process:
 
 "%s"`, clipboardData)
 
+
+	config := &genai.GenerateContentConfig{
+		ResponseMIMEType: "application/json",
+	}
+
 	result, err := client.Models.GenerateContent(
 		ctx,
-		"gemini-2.5-flash",
+		"gemini-2.5-pro",
 		genai.Text(prompt),
-		nil,
+		config,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -47,20 +46,20 @@ Here is the text to process:
 	return result.Text()
 }
 
-func CleanLLMOutput(llmOutput string) string {
-	// Trim leading/trailing whitespace
-	cleaned := strings.TrimSpace(llmOutput)
+// func CleanLLMOutput(llmOutput string) string {
+// 	// Trim leading/trailing whitespace
+// 	cleaned := strings.TrimSpace(llmOutput)
 
-	// Remove ```json or ``` fences (any language or no language)
-	re := regexp.MustCompile("(?s)```[a-zA-Z]*\\n?(.*?)```")
-	matches := re.FindStringSubmatch(cleaned)
-	if len(matches) > 1 {
-		// Extract inner content
-		cleaned = matches[1]
-	}
+// 	// Remove ```json or ``` fences (any language or no language)
+// 	re := regexp.MustCompile("(?s)```[a-zA-Z]*\\n?(.*?)```")
+// 	matches := re.FindStringSubmatch(cleaned)
+// 	if len(matches) > 1 {
+// 		// Extract inner content
+// 		cleaned = matches[1]
+// 	}
 
-	return strings.TrimSpace(cleaned)
-}
+// 	return strings.TrimSpace(cleaned)
+// }
 
 func ParseLLMoutput(CleanllmOutput string) (*JSONformatClipboardData, error) {
 
